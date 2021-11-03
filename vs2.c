@@ -20,7 +20,7 @@ Position CreatePerson(char* name, char* surname, int birthYear);
 int InsertAfter(Position position, Position newPerson);
 Position FindLast(Position head);
 Position FindPerson(Position first, char* surname);
-Position FindBefore(Position first);
+Position FindBefore(Position head, char* surname);
 int DeleteAfter(Position head, char* surname);
  
 int main(int argc, char** argv) {
@@ -33,12 +33,14 @@ int main(int argc, char** argv) {
 	PrependList(&head, "Ivo", "Ivic", 1997);
 	
 	PrintList(p->next);
-
-	//InsertAfter();
+	printf("\n");
 
 	FindPerson(head.next, "Puaca");
 
 	DeleteAfter(&head, "Pupacic");
+
+	PrintList(p->next);
+	printf("\n");
 
 	return EXIT_SUCCESS;
 }
@@ -135,41 +137,32 @@ Position FindPerson(Position first, char* surname)
 	return temp;
 }
 
-Position FindBefore(Position first)
+Position FindBefore(Position head, char* surname)
 {
-    char surname[MAX_SIZE];
-    Position temp = first;
+    Position temp = head;
 
-    if(temp->next == NULL)
-        temp = NULL;
-
-    else {
-        while (strcmp(temp->surname, surname) != 0 && temp != NULL) {
+    while (temp->next != NULL && strcmp(temp->next->surname, surname) != 0) {
 		    temp = temp->next;       
 	    }
-        if(strcmp(temp->surname, surname) == 0) {
-            temp = NULL;
-        }
-    }
 
     return temp;
 }
 
 int DeleteAfter(Position head, char* surname)
 {
-    Position before;
-    Position ToDelete;
+    Position before = NULL;
+    Position ToDelete = NULL;
 
-    before = FindBefore(head);
+    before = FindBefore(head, surname);
 
-    if(!before)
-        printf("Element ne postoji!");
+    ToDelete = before->next;
 
-    else {
-        ToDelete = before->next;
-        before->next = ToDelete->next;
-        free(ToDelete);
-    }
+	if (!ToDelete) {
+		return EXIT_SUCCESS;
+	}
+	
+    before->next = ToDelete->next;
+    free(ToDelete);
 
     return EXIT_SUCCESS;
 }
