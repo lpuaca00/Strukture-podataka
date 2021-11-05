@@ -11,66 +11,59 @@ typedef struct _Person {
 	char surname[MAX_SIZE];
 	int birthYear;
 	Position next;
-}Person;
+} Person;
  
+
 int PrependList(Position head, char* name, char* surname, int birthYear);
 int AppendList(Position head, char* name, char* surname, int birthYear);
 int PrintList(Position first);
 Position CreatePerson(char* name, char* surname, int birthYear);
-int InsertAfter(Position position, Position newPerson);
-int InsertBefore(Position position, Position newPerson);
+int InsertAfter(Position after, Position position);
+int InsertBefore(Position position);
 Position FindLast(Position head);
 Position FindPerson(Position first, char* surname);
 Position FindBefore(Position head, char* surname);
 int DeleteAfter(Position head, char* surname);
 int SortList(Position head);
-int WriteInFile(FILE *datoteka, Position head);
-int ReadFromFile(FILE *datoteka);
+int WriteInFile(char* ime, Position head);
+int ReadFromFile(char* ime, Position head);
+int InsertAfter1(Position position, Position newPerson);
+int menu(Position position);
+int DeleteAll(Position head);
 
-int main(int argc, char** argv) {
- 
+
+int main(int argc, char** argv) 
+{ 
 	Person head = { .next = NULL, .name = {0}, .surname = {0}, .birthYear = 0 };
 	Position p = &head;
-    Position newPerson1 = NULL;
-    Position newPerson2 = NULL;
-    Position after = NULL;
-    Position ispred = NULL;
 
-    PrependList(&head, "Lucijana", "Puaca", 2001);
-	AppendList(&head, "Karla", "Pupacic", 2002);
-	PrependList(&head, "Ivo", "Ivic", 1997);
-	
-	PrintList(p->next);
-	printf("\n");
+	int odabir = 0;
+    
+	do {
+		printf("Zelite li odabrati opciju za listu?\n1 - da\t2 - ne.");
+		scanf(" %s", odabir);
 
-	after = FindPerson(head.next, "Puaca");
-    ispred = FindBefore(&head, "Pupacic");
-	//DeleteAfter(&head, "Pupacic");
+		menu(p);
+	}
+	while(odabir == 1);
 
-    newPerson1 = CreatePerson("Katarina", "Novakovic", 2000);
-    newPerson2 = CreatePerson("Ivona", "Pavela", 2001);
-
-    if(!after && !newPerson1) {
-        return -1;
-    }
-
-    InsertAfter(after, newPerson1);
-	
-    if(!ispred && !newPerson2) {
-        return -1;
-    }
-
-    InsertBefore(ispred, newPerson2);
-
-    PrintList(p->next);
-	printf("\n");
-
-    SortList(&head);
-
-    PrintList(p->next);
-	printf("\n");
+	DeleteAll(p);
 
 	return EXIT_SUCCESS;
+}
+
+int DeleteAll(Position head)
+{
+    Position temp=NULL;
+    
+    while (head->next!=NULL)
+    {
+        temp=head->next;
+        head->next=temp->next;
+        free(temp);
+    }
+    
+    return 0;
 }
  
 int PrependList(Position head, char* name, char* surname, int birthYear) {
@@ -82,7 +75,7 @@ int PrependList(Position head, char* name, char* surname, int birthYear) {
 		return -1;
 	}
  
-	InsertAfter(head, newPerson);
+	InsertAfter1(head, newPerson);
  
 	return EXIT_SUCCESS;
 }
@@ -98,11 +91,19 @@ int AppendList(Position head, char* name, char* surname, int birthYear)
 	}
  
 	last = FindLast(head);
-	InsertAfter(last, newPerson);
+	InsertAfter1(last, newPerson);
  
 	return EXIT_SUCCESS;
 }
+
+int InsertAfter1 (Position position, Position newPerson)
+{
+	newPerson->next = position->next;
+	position->next = newPerson;
  
+	return EXIT_SUCCESS;
+}
+
 int PrintList(Position first)
 {
 	Position temp = first;
@@ -133,11 +134,51 @@ Position CreatePerson(char* name, char* surname, int birthYear)
 	return newPerson;
 }
  
-int InsertAfter(Position position, Position newPerson)
+int InsertAfter(Position after, Position position)
 {
-	newPerson->next = position->next;
-	position->next = newPerson;
+	Position newPerson = NULL;
+	char surname[20] = {0}, name[20] = {0};
+	int birthYear;
+
+	printf("Unesite ime, prezime i godiste osobe.");
+	scanf(" %s %s %d", name, surname, &birthYear);
+
+	newPerson = CreatePerson(name, surname, birthYear);
+
+	if(!after && !newPerson) {
+        return -1;
+    }
+
+	newPerson->next = after->next;
+	after->next = newPerson;
  
+	return EXIT_SUCCESS;
+}
+
+int InsertBefore(Position position)
+{
+	Position newPerson = NULL;
+    Position ispred = NULL;
+	char osoba[20] = {0};
+	char surname[20] = {0}, name[20] = {0};
+	int birthYear;
+
+	printf("Unesite prezime osobe ispred koje zelite unijeti novu osobu");
+	scanf(" %s", osoba);
+
+	ispred = FindBefore(position->next, osoba);
+
+	printf("Unesite ime, prezime i godiste osobe.");
+	scanf(" %s %s %d", name, surname, &birthYear);
+
+	newPerson = CreatePerson(name, surname, birthYear);
+
+	if(!ispred && !newPerson) {
+        return -1;
+    }
+
+	InsertAfter(ispred, position);
+
 	return EXIT_SUCCESS;
 }
  
@@ -195,14 +236,8 @@ int DeleteAfter(Position head, char* surname)
     return EXIT_SUCCESS;
 }
 
-int InsertBefore(Position position, Position newPerson) 
+int SortList(Position head)
 {
-    InsertAfter(position, newPerson);
-
-    return EXIT_SUCCESS;
-}
-
-int SortList(Position head){
 
     Position temp1 = NULL, temp2 = NULL, temp3 = NULL, end = NULL;
 
@@ -226,11 +261,16 @@ int SortList(Position head){
     return 0;
 }
 
-int WriteInFile(FILE *datoteka, Position head)
+int WriteInFile(char* ime, Position head)
 {
+	FILE* datoteka = NULL;
     Position temp = head->next;
 
-    datoteka = fopen("lista.txt", "w");
+    datoteka = fopen(ime, "w");
+	if(!datoteka) {
+		printf("Neuspjesno otvaranje datoteke!");
+		return -1;
+	}
 
     while(temp) {
         fprintf(datoteka, " %s\t%s\t%d\n", temp->name, temp->surname, temp->birthYear);
@@ -242,10 +282,143 @@ int WriteInFile(FILE *datoteka, Position head)
     return EXIT_SUCCESS;
 }
 
-int ReadFromFile(FILE *datoteka)
+int ReadFromFile(char* ime, Position head)
 {
-    //ne razumijem kako se koristi buffer ali znam da treba s njim rijesiti
-    //pa cu ovo nadopuniti naknadno
+    Position temp=head;
+    FILE* datoteka = NULL;
+    char buffer[MAX_SIZE]={0}, name[20]={0}, surname[20]={0};
+    int birthYear=0;
+    
+    datoteka = fopen(ime, "r");
+    if(!datoteka) {
+        printf("Neuspjesno otvaranje datoteke.");
+        return -1;
+    }
+    
+    while(!feof(datoteka))
+    {
+        fgets(buffer, MAX_SIZE, datoteka);
+        fgets(buffer, MAX_SIZE, datoteka);
+    }
+    
+    fclose(datoteka);
 
     return EXIT_SUCCESS;
+}
+
+int menu(Position position) 
+{
+	char ime = {0};
+    int odabir = 0;
+	int birthYear = 0;
+    char name[20] = {0}, surname[20] = {0};
+    char odabir2[20] = {0};
+	Position after = NULL;
+	char osoba[20] = {0};
+
+	printf("Odaberite sto zelite napraviti u listi: \n"
+		   "1 - Dodati novu osobu u listu na pocetak\n"
+		   "2 - Dodati novu osobu u listu na kraj\n"
+		   "3 - Isprintati listu\n"
+		   "4 - Izbrisati nekoga s liste\n"
+		   "5 - Sortirati listu\n"
+		   "6 - Napisati listu u datoteku\n"
+		   "7 - Ispisati listu iz datoteke\n"
+		   "8 - Dodati novu osobu nakon nekoga\n"
+		   "9 - Dodati novu osobu ispred nekoga\n\n");
+
+	scanf("%d", &odabir);
+
+	switch(odabir) {
+		case 1:
+		{
+			while(1) {
+				printf("Unesite ime, prezime i godiste osobe.");
+				scanf(" %s %s %d", name, surname, &birthYear);
+
+				PrependList(position, name, surname, birthYear);
+			}
+
+			break;
+		}
+		case 2:
+		{
+			while(1) {
+				printf("Unesite ime, prezime i godiste osobe.");
+				scanf(" %s %s %d", name, surname, &birthYear);
+			
+				AppendList(position, name, surname, birthYear);
+			}
+
+			break;
+		}
+		case 3:
+        {
+        	PrintList(position->next);
+
+        	break;
+        }
+		case 4:
+        {
+            printf("Unesite prezime osobe koju zelite izbrisati: \n");
+            scanf(" %s", odabir2);
+           
+		    DeleteAfter(position, odabir2);
+           
+		    break;
+        }
+		case 5:
+		{
+			SortList(position);
+			
+			break;
+		}
+		case 6:
+		{
+			printf("Unesite ime datoteke u koju zelite unijeti listu: \n");
+            scanf(" %s", odabir2);
+
+			strcat(odabir2, ".txt");
+
+            WriteInFile(odabir2, position);
+
+            break;
+		}
+		case 7:
+		{
+			printf("Unesite ime datoteke iz koje zelite procitati listu: \n");
+            scanf(" %s", odabir2);
+			
+			strcat(odabir2, ".txt");
+            
+			ReadFromFile(odabir2, position);
+            
+			break;
+		}
+		case 8:
+		{
+			printf("Unesite prezime osobe iza koje zelite unijeti novu osobu");
+			scanf(" %s", osoba);
+
+			after = FindPerson(position->next, osoba);
+
+			InsertAfter(after,position);
+
+			break;
+		}
+		case 9:
+		{
+			InsertBefore(position);
+
+			break;
+		}
+		default:
+		{
+			printf("Krivo ste unijeli odabir. ");
+			
+			break;
+		}
+	}
+
+	return 0;
 }
