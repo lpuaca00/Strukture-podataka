@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 struct _tree;
 typedef struct _tree* Position;
@@ -20,7 +21,7 @@ Position Minimum(Position root);
 Position Delete(Position root, int num);
 Position Search(Position root, int num);
 int Menu(Position current);
-Position PrintLevel(Position root, int brojac);
+bool PrintLevel(Position root, int brojac);
 Position PrintLevelorder(Position root);
 
 int main() 
@@ -103,7 +104,7 @@ Position CreateNew(int num)
     if (!new)
     {
         printf("Couldn't allocate memory!\n");
-        return EXIT_FAILURE;
+        return NULL;
     }
 
     new -> number = num;
@@ -146,30 +147,26 @@ int PrintPreorder(Position root)
 }
 
 //ispis level ordera
-Position PrintLevel(Position root, int brojac)
-{
-    Position current1 = NULL, current2 = NULL;
+bool PrintLevel(Position root, int brojac) {
+    bool current1 = NULL, current2 = NULL;
 
     if (root == NULL) {
-        return EXIT_FAILURE;
+        return NULL;
     }
  
-    if (brojac == 1)
-    {
+    if (brojac == 1) {
         printf("%d ", root -> number);
-        return 0;
+        return true;
     }
     
     current1 = PrintLevel(root -> left, brojac - 1);
     current2 = PrintLevel(root -> right, brojac - 1);
 
-    if(current1 || current2) {
-        return EXIT_SUCCESS;
-    }
+    return current1 || current2;
 
 }
-Position PrintLevelorder(Position root)
-{
+
+Position PrintLevelorder(Position root) {
     int brojac = 1;
 
     if(root == NULL) {

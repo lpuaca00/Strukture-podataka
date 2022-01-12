@@ -34,27 +34,25 @@ int main()
     Number head2 = { .next = NULL, .koeficijent = 0, .eksponent = 0 };
     Number ResultAdd = { .next = NULL, .koeficijent = 0, .eksponent = 0 };
     Number ResultMult = { .next = NULL, .koeficijent = 0, .eksponent = 0 };
-    char filename[MAX_SIZE] = {0};    
+    char fileName[MAX_SIZE] = {0};    
 
-    EnterFileName(filename);
+    EnterFileName(fileName);
+    ReadFile(&head1, &head2, fileName);
+    
+    PrintNumbers(&head1);
+    PrintNumbers(&head2);
 
-    if(ReadFile(&head1, &head2, filename) == EXIT_SUCCESS) 
-    {
-        PrintNumbers(&head1);
-        PrintNumbers(&head2);
+    Addition(&head1, &head2, &ResultAdd);
+    Multiplication(&ResultMult, &head1, &head2);
 
-        Addition(&head1, &head2, &ResultAdd);
-        Multiplication(&ResultMult, &head1, &head2);
+    PrintNumbers(&ResultAdd);
+    PrintNumbers(&ResultMult);
 
-        PrintNumbers(&ResultAdd);
-        PrintNumbers(&ResultMult);
-
-        FreeMemory(&head1);
-        FreeMemory(&head2);
-        FreeMemory(&ResultMult);
-        FreeMemory(&ResultAdd);
-    }
-
+    FreeMemory(&head1);
+    FreeMemory(&head2);
+    FreeMemory(&ResultMult);
+    FreeMemory(&ResultAdd);
+    
     return EXIT_SUCCESS;
 }
 

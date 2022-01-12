@@ -39,9 +39,9 @@ int main()
     root->left = NULL;
     root->right = NULL;
     for(i = 1; i < 10; i++) {
-        root = insert(root, a[i]);
+        root = Insert(root, a[i]);
     }
-    print(root);
+    Print(root, &head);
 
 
     /*srand(time(NULL));

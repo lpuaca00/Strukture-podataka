@@ -1,0 +1,13 @@
+Zagreb	790000
+Split	178000
+Osijek	108000
+Zadar 75000
+Slavonski_Brod 59000
+Karlovac 55000
+Sibenik	46000
+Dubrovnik 42500
+Kastela	38600
+Vinkovci 35300
+Vukovar	27600
+Sinj 24800
+Solin 23900
